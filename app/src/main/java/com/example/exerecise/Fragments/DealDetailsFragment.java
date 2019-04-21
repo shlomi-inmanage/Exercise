@@ -47,6 +47,8 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
         View view  = inflater.inflate(R.layout.deal_details_fragment, container,false);
         mContext = getContext();
         mapView = view.findViewById(R.id.ddf_mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume();
         mapView.getMapAsync(this);
         generalFuncs = new GeneralFuncs();
         item = (TransactionItem) getArguments().getSerializable(LIST_KEY);

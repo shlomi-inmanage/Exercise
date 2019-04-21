@@ -6,6 +6,7 @@
     <string name="website">Website : </string>
     <string name="order_details">Order Details</string>
     <string name="cost"> ₪ </string>
+    <string name="google_api_key">AIzaSyDhNqeCbgRIhdnrh_D8Twf7YmdNi-vw7xw</string>
 
 
 </resources>

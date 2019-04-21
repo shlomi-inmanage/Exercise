@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class MainFragment extends Fragment {
 
-    private Context mcContext;
+    private Context mContext;
     private static final String LIST_KEY = "list_key";
     private static final String BANNER_KEY = "banner_key";
     private String banner;
@@ -39,12 +39,12 @@ public class MainFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mcContext = getContext();
+        View view  = inflater.inflate(R.layout.main_fragment, container,false);
+        mContext = getContext();
         listItems = (ArrayList<TransactionListItem>) getArguments().getSerializable(LIST_KEY);
         banner = (String) getArguments().getSerializable(BANNER_KEY);
-        View view  = inflater.inflate(R.layout.main_fragment, container,false);
         gridView = (GridView)view.findViewById(R.id.mf_gridview);
-        viewAdapter = new GridViewAdapter(listItems,mcContext,banner);
+        viewAdapter = new GridViewAdapter(listItems,mContext,banner);
         gridView.setAdapter(viewAdapter);
         return view;
     }

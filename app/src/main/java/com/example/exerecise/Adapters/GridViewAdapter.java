@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.example.exerecise.Models.TransactionListItem;
 import com.example.exerecise.R;
 import com.example.exerecise.Util.ChangeFragment;
+import com.example.exerecise.Util.GeneralFuncs;
 
 import java.util.ArrayList;
 
@@ -23,9 +24,11 @@ public class GridViewAdapter  extends BaseAdapter {
     private Context mContext;
     private String banner;
     private ChangeFragment mCallback;
+    private GeneralFuncs generalFuncs;
 
     public GridViewAdapter(ArrayList<TransactionListItem> transactionListItemsList, Context context, String banner) {
-        this.transactionListItemsList = transactionListItemsList;
+        generalFuncs =new GeneralFuncs();
+        this.transactionListItemsList = generalFuncs.sortArrayList(transactionListItemsList);
         this.mContext = context;
         this.banner = banner;
         this.layoutInflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -62,7 +65,7 @@ public class GridViewAdapter  extends BaseAdapter {
         final ImageView image = convertView.findViewById(R.id.cv_imageview);
 
         title.setText(item.getTitle());
-        price.setText(String.valueOf(item.getPrice()));
+        price.setText(generalFuncs.priceSet(item.getPrice())+mContext.getResources().getString(R.string.cost));
         Glide.with(mContext).load(item.getImage()).into(image);
 
 

@@ -4,5 +4,8 @@
     <string name="title">Title : </string>
     <string name="description">Description : </string>
     <string name="website">Website : </string>
+    <string name="order_details">Order Details</string>
+    <string name="cost"> ₪ </string>
+
 
 </resources>

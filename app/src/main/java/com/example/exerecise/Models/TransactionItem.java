@@ -3,7 +3,9 @@ package com.example.exerecise.Models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class TransactionItem {
+import java.io.Serializable;
+
+public class TransactionItem implements Serializable {
 
     private String id;
     private String title;

@@ -17,12 +17,14 @@ public class VolleyRequest {
     private Context mContext;
     private String url;
     private getResponse mCallback;
+    private int mFragment;
     public static final String  TAG = "VolleyRequest";
 
 
-    public VolleyRequest(Context mContext, String url) {
+    public VolleyRequest(Context mContext, String url, int fragment) {
         this.mContext = mContext;
         this.url = url;
+        this.mFragment = fragment;
         mCallback = (getResponse)mContext;
         getRequest();
     }
@@ -34,7 +36,7 @@ public class VolleyRequest {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        mCallback.getJSONObject(response);
+                        mCallback.getJSONObject(response, mFragment);
                     }
                 }, new Response.ErrorListener() {
 

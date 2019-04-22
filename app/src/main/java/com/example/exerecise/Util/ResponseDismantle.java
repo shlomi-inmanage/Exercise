@@ -8,16 +8,18 @@ import org.json.JSONObject;
 
 public class ResponseDismantle {
 
-    String id;
-    String title;
-    int price;
-    String description;
-    String image;
-    int optionsToShow;
-    JSONObject gps;
-    String website;
-    String phone;
-    int order_num;
+    private String id;
+    private String title;
+    private int price;
+    private String description;
+    private String image;
+    private int optionsToShow;
+    private JSONObject gps;
+    private String website;
+    private String phone;
+    private int order_num;
+    private String lat;
+    private String lon;
 
     public TransactionItem getItem(JSONObject jsonObject) throws JSONException {
         id = jsonObject.getString("id");
@@ -29,9 +31,13 @@ public class ResponseDismantle {
         gps = jsonObject.getJSONObject("gps");
         website = jsonObject.getString("website");
         phone = jsonObject.getString("phone");
+        lat = gps.getString("lat");
+        lon = gps.getString("lon");
+
+
 
         TransactionItem response = new TransactionItem(id,title,price,description,image,optionsToShow,
-                gps,website,phone);
+                lat,lon,website,phone);
         return response;
     }
 

@@ -1,6 +1,6 @@
 package com.example.exerecise.Models;
 
-public class TransactionListItem {
+public class TransactionListItem{
 
     private String id;
     private String title;

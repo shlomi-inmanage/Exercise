@@ -47,6 +47,5 @@ public class VolleyRequest {
                     }
                 });
         queue.add(jsonObjectRequest);
-
     }
 }

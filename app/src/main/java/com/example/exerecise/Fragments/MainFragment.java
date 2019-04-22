@@ -5,12 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 
-import com.example.exerecise.Adapters.GridViewAdapter;
+import com.example.exerecise.Adapters.RecyclerViewAdapter;
 import com.example.exerecise.Models.TransactionListItem;
 import com.example.exerecise.R;
 
@@ -23,8 +24,8 @@ public class MainFragment extends Fragment {
     private static final String BANNER_KEY = "banner_key";
     private String banner;
     private ArrayList<TransactionListItem> listItems;
-    private GridView gridView;
-    private GridViewAdapter viewAdapter;
+    private RecyclerView mRecyclerView;
+    private RecyclerViewAdapter mRecyclerViewAdapter;
 
     public static MainFragment newInstance(ArrayList<TransactionListItem> list, String banner){
         MainFragment mainFragment = new MainFragment();
@@ -43,9 +44,23 @@ public class MainFragment extends Fragment {
         mContext = getContext();
         listItems = (ArrayList<TransactionListItem>) getArguments().getSerializable(LIST_KEY);
         banner = (String) getArguments().getSerializable(BANNER_KEY);
-        gridView = (GridView)view.findViewById(R.id.mf_gridview);
-        viewAdapter = new GridViewAdapter(listItems,mContext,banner);
-        gridView.setAdapter(viewAdapter);
+        mRecyclerView =view.findViewById(R.id.mf_recyclerView);
+        mRecyclerView.setHasFixedSize(false);
+        RecyclerView.LayoutManager manager = new GridLayoutManager(mContext,2);
+        ((GridLayoutManager) manager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int i) {
+                if(i==2){
+                    return 2;
+                }else{
+                    return 1;
+                }
+
+            }
+        });
+        mRecyclerView.setLayoutManager(manager);
+        mRecyclerViewAdapter = new RecyclerViewAdapter(listItems,mContext,banner);
+        mRecyclerView.setAdapter(mRecyclerViewAdapter);
         return view;
     }
 }

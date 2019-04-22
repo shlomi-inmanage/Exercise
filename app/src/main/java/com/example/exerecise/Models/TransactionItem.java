@@ -1,11 +1,9 @@
 package com.example.exerecise.Models;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
 
-public class TransactionItem implements Serializable {
+public class TransactionItem  extends TransactionListItem implements Serializable  {
 
     private String id;
     private String title;
@@ -13,24 +11,24 @@ public class TransactionItem implements Serializable {
     private String description;
     private String image;
     private int optionsToShow;
-    private JSONObject gps;
     private String lat;
     private String lon;
     private String website;
     private String phone;
 
-    public TransactionItem(String id, String title, int price, String description, String image, int optionsToShow, JSONObject gps, String website, String phone) {
+    public TransactionItem(String id, String title, int price, String description, String image, int optionsToShow, String lat, String lon, String website, String phone) {
+        super(id,title,price,image,0);
         this.id = id;
         this.title = title;
         this.price = price;
         this.description = description;
         this.image = image;
         this.optionsToShow = optionsToShow;
-        this.gps = gps;
         this.website = website;
         this.phone = phone;
-        setLat();
-        setLon();
+        this.lat = lat;
+        this.lon = lon;
+
     }
 
     public String getId() {
@@ -81,36 +79,20 @@ public class TransactionItem implements Serializable {
         this.optionsToShow = optionsToShow;
     }
 
-    public JSONObject getGps() {
-        return gps;
-    }
-
-    public void setGps(JSONObject gps) {
-        this.gps = gps;
-    }
-
     public String getLat() {
         return lat;
     }
 
-    public void setLat() {
-        try {
-            this.lat = gps.getString("lat");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public void setLat(String lat) {
+        this.lat = lat;
     }
 
     public String getLon() {
         return lon;
     }
 
-    public void setLon() {
-        try {
-            this.lon = gps.getString("lon");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public void setLon(String lon) {
+        this.lon = lon;
     }
 
     public String getWebsite() {

@@ -35,6 +35,9 @@ import java.util.ArrayList;
 public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
 
     private static final String LIST_KEY = "list_key";
+    private final static int SHOW_PHONE_BUTTON = 1;
+    private final static int SHOW_NAV_BUTTON = 2;
+    private final static int SHOW_WEBSITE_BUTTON = 4;
     private TransactionItem item;
     private Context mContext;
     private Activity mActivity;
@@ -59,20 +62,9 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.deal_details_fragment, container,false);
-        mContext = getContext();
-        mActivity = getActivity();
-        mapView = view.findViewById(R.id.ddf_mapView);
-        mapView.onCreate(savedInstanceState);
-        mapView.onResume();
-        mapView.getMapAsync(this);
-        generalFuncs = new GeneralFuncs();
-        ArrayList<TransactionItem> items = (ArrayList<TransactionItem>) getArguments().getSerializable(LIST_KEY);
-        item = items.get(0);
-        title = view.findViewById(R.id.ddf_title);
-        price = view.findViewById(R.id.ddf_price);
-        description = view.findViewById(R.id.ddf_description);
-        imageView = view.findViewById(R.id.ddf_imageView);
-        showButtons(item.getOptionsToShow(),view);
+        initViews(view, savedInstanceState);
+        getAndHandleBundle();
+        showButtons(item.getOptionsToShow());
         setInfo();
         return view;
     }
@@ -98,18 +90,15 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
     }
 
-    private void showButtons(int b, View view){
-        btn_phone = view.findViewById(R.id.ddf_phone_btn);
-        btn_nav = view.findViewById(R.id.ddf_navigate_btn);
-        btn_website = view.findViewById(R.id.ddf_website_btn);
+    private void showButtons(int b){
         switch (b){
-            case 1:
+            case SHOW_PHONE_BUTTON:
                 btn_phone.setVisibility(View.VISIBLE);
                 break;
-            case 2:
+            case SHOW_NAV_BUTTON:
                 btn_nav.setVisibility(View.VISIBLE);
                 break;
-            case 4:
+            case SHOW_WEBSITE_BUTTON:
                 btn_website.setVisibility(View.VISIBLE);
                 break;
         }
@@ -154,6 +143,28 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
 
     public boolean onBackPressed() {
         return false;
+    }
+
+    private void initViews(View view, Bundle savedInstanceState){
+        mContext = getContext();
+        mActivity = getActivity();
+        mapView = view.findViewById(R.id.ddf_mapView);
+        title = view.findViewById(R.id.ddf_title);
+        price = view.findViewById(R.id.ddf_price);
+        description = view.findViewById(R.id.ddf_description);
+        imageView = view.findViewById(R.id.ddf_imageView);
+        btn_phone = view.findViewById(R.id.ddf_phone_btn);
+        btn_nav = view.findViewById(R.id.ddf_navigate_btn);
+        btn_website = view.findViewById(R.id.ddf_website_btn);
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume();
+        mapView.getMapAsync(this);
+        generalFuncs = new GeneralFuncs();
+    }
+
+    private void getAndHandleBundle(){
+        ArrayList<TransactionItem> items = (ArrayList<TransactionItem>) getArguments().getSerializable(LIST_KEY);
+        item = items.get(0);
     }
 
 }

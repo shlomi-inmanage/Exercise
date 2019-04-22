@@ -18,7 +18,7 @@ public class VolleyRequest {
     private String url;
     private getResponse mCallback;
     private int mFragment;
-    public static final String  TAG = "VolleyRequest";
+    private static final String  TAG = "VolleyRequest";
 
 
     public VolleyRequest(Context mContext, String url, int fragment) {

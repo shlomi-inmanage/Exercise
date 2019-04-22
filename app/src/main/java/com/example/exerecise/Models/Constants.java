@@ -1,4 +1,4 @@
-package com.example.exerecise;
+package com.example.exerecise.Models;
 
 public class Constants {
     public static final int MAIN_FRAGMENT = 101;

@@ -17,11 +17,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Request;
 import com.bumptech.glide.Glide;
+import com.example.exerecise.MainActivity;
+import com.example.exerecise.Models.Constants;
+import com.example.exerecise.Models.NetworkResponse;
+import com.example.exerecise.Models.Server_Request.ServerRequestParameters;
+import com.example.exerecise.Models.Server_Request.UrlBuilder;
 import com.example.exerecise.Models.TransactionItem;
 import com.example.exerecise.R;
 import com.example.exerecise.Util.GeneralFuncs;
 import com.example.exerecise.Util.GetPermissions;
+import com.example.exerecise.Util.VolleyCallback;
+import com.example.exerecise.Util.VolleyRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -29,10 +37,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 
 
-public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
+public class DealDetailsFragment extends Fragment implements OnMapReadyCallback, VolleyCallback {
 
     private static final String LIST_KEY = "list_key";
     private final static int SHOW_PHONE_BUTTON = 1;
@@ -49,13 +59,7 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
     private Button btn_phone, btn_nav, btn_website;
 
 
-    public static DealDetailsFragment newInstance(ArrayList<TransactionItem> item){
-        DealDetailsFragment detailsFragment = new DealDetailsFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(LIST_KEY,  item);
-        detailsFragment.setArguments(bundle);
-
-        return detailsFragment;
+    public DealDetailsFragment() {
     }
 
     @Nullable
@@ -63,9 +67,10 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.deal_details_fragment, container,false);
         initViews(view, savedInstanceState);
-        getAndHandleBundle();
-        showButtons(item.getOptionsToShow());
-        setInfo();
+        Bundle bundle = this.getArguments();
+        if(bundle!=null){
+            getDealDetails(bundle.getString("id"));
+        }
         return view;
     }
 
@@ -82,7 +87,9 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        setMarker(new LatLng(Double.valueOf(item.getLat()),Double.valueOf(item.getLon())));
+        if(item!=null){
+            setMarker(new LatLng(Double.valueOf(item.getLat()),Double.valueOf(item.getLon())));
+        }
     }
 
     private void setMarker(LatLng latLng){
@@ -162,9 +169,31 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback{
         generalFuncs = new GeneralFuncs();
     }
 
-    private void getAndHandleBundle(){
-        ArrayList<TransactionItem> items = (ArrayList<TransactionItem>) getArguments().getSerializable(LIST_KEY);
-        item = items.get(0);
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+        mActivity = getActivity();
+        ((MainActivity)context).volleyCallback = this;
     }
 
+    @Override
+    public void onSuccess(NetworkResponse result) throws JSONException {
+        item = result.getTransactionItem();
+        showButtons(item.getOptionsToShow());
+        setInfo();
+    }
+
+    @Override
+    public void onError(String result) throws Exception {
+
+    }
+
+    private void getDealDetails(String id){
+        String url ="https://androidtest.inmanage.com/api/1.0/android/getDeal_"+id+".txt";
+        ServerRequestParameters serverRequestParameters = new ServerRequestParameters(null,null, Request.Method.GET,
+                new UrlBuilder(Constants.URL_GET_SINGLE_DEAL,url,null,null),Constants.MAIN_FRAGMENT,true);
+        VolleyRequest volleyRequest = new VolleyRequest(mContext,serverRequestParameters,this);
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.exerecise.Util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -8,35 +9,49 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.example.exerecise.MainActivity;
+import com.example.exerecise.Models.NetworkResponse;
+import com.example.exerecise.Models.Server_Request.CustomJSONObjectRequest;
+import com.example.exerecise.Models.Server_Request.ServerRequestParameters;
+import com.example.exerecise.Models.Server_Request.VolleyController;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class VolleyRequest {
 
     private Context mContext;
-    private String url;
-    private getResponse mCallback;
-    private int mFragment;
+    private Activity mActivity;
+    private VolleyCallback mVolleyCallback;
+    private ServerRequestParameters serverRequestParameters;
+    private LoaderManager loaderManager;
     private static final String  TAG = "VolleyRequest";
 
 
-    public VolleyRequest(Context mContext, String url, int fragment) {
+    public VolleyRequest(Context mContext, ServerRequestParameters serverRequestParameters, final VolleyCallback callback) {
         this.mContext = mContext;
-        this.url = url;
-        this.mFragment = fragment;
-        mCallback = (getResponse)mContext;
+        this.serverRequestParameters = serverRequestParameters;
+        this.mVolleyCallback = callback;
+        loaderManager = (LoaderManager)mContext;
         getRequest();
     }
 
     public void getRequest(){
-        RequestQueue queue = Volley.newRequestQueue(mContext);
+        if(serverRequestParameters.isShow_loader()){
+            loaderManager.showLoader();
+        }
+        RequestQueue queue = VolleyController.getInstance(mContext).getRequestQueue();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                (serverRequestParameters.getMethod(), serverRequestParameters.getBuilder().getFinalUrl(), null, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        mCallback.getJSONObject(response, mFragment);
+                        try {
+                            NetworkResponse networkResponse = new NetworkResponse(response,serverRequestParameters.getBuilder().getBaseUrl(), mVolleyCallback);
+                            loaderManager.hideLoader();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }, new Response.ErrorListener() {
 
@@ -48,4 +63,5 @@ public class VolleyRequest {
                 });
         queue.add(jsonObjectRequest);
     }
+
 }

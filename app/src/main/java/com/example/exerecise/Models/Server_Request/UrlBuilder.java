@@ -9,10 +9,11 @@ public class UrlBuilder {
     private ArrayList<String> keys;
     private ArrayList<String> values;
 
-    public UrlBuilder(String baseUrl, ArrayList<String> keys, ArrayList<String> values) {
+    public UrlBuilder(String baseUrl,String finalUrl, ArrayList<String> keys, ArrayList<String> values) {
         this.baseUrl = baseUrl;
         this.keys = keys;
         this.values = values;
+        this.finalUrl = finalUrl;
         setFinalUrl();
     }
 
@@ -22,7 +23,7 @@ public class UrlBuilder {
 
     private void setFinalUrl() {
         StringBuilder sb = new StringBuilder();
-        sb.append(baseUrl);
+        sb.append(finalUrl);
         if(keys!=null&&values!=null){
             if(keys.size()==values.size()){
                 for (int i = 0; i < keys.size(); i++) {

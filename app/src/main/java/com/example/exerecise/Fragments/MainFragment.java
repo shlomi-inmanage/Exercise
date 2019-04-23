@@ -13,16 +13,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.example.exerecise.Adapters.RecyclerViewAdapter;
 import com.example.exerecise.MainActivity;
+import com.example.exerecise.Models.Constants;
 import com.example.exerecise.Models.NetworkResponse;
+import com.example.exerecise.Models.Server_Request.ServerRequestParameters;
+import com.example.exerecise.Models.Server_Request.UrlBuilder;
 import com.example.exerecise.Models.TransactionListItem;
 import com.example.exerecise.R;
 import com.example.exerecise.Util.Pass_Response_To_Fragment_Interface;
+import com.example.exerecise.Util.VolleyCallback;
+import com.example.exerecise.Util.VolleyRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainFragment extends Fragment implements Pass_Response_To_Fragment_Interface {
+public class MainFragment extends Fragment implements VolleyCallback {
 
     private Context mContext;
     private Activity mActivity;
@@ -36,15 +45,7 @@ public class MainFragment extends Fragment implements Pass_Response_To_Fragment_
     private RecyclerView mRecyclerView;
     private RecyclerViewAdapter mRecyclerViewAdapter;
 
-    public static MainFragment newInstance(ArrayList<TransactionListItem> list, String banner){
-        MainFragment mainFragment = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(BANNER_KEY, banner);
-        bundle.putSerializable(LIST_KEY, list);
-        mainFragment.setArguments(bundle);
 
-        return mainFragment;
-    }
 
     public MainFragment() {
     }
@@ -54,7 +55,6 @@ public class MainFragment extends Fragment implements Pass_Response_To_Fragment_
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.main_fragment, container,false);
         initViews(view);
-//        getAndHandleBundle();
         return view;
     }
 
@@ -62,10 +62,6 @@ public class MainFragment extends Fragment implements Pass_Response_To_Fragment_
         mRecyclerView =view.findViewById(R.id.mf_recyclerView);
     }
 
-    private void getAndHandleBundle(){
-        listItems = (ArrayList<TransactionListItem>) getArguments().getSerializable(LIST_KEY);
-        banner = (String) getArguments().getSerializable(BANNER_KEY);
-    }
 
     private void initRecyclerView(){
         mRecyclerView.setHasFixedSize(false);
@@ -78,7 +74,6 @@ public class MainFragment extends Fragment implements Pass_Response_To_Fragment_
                 }else{
                     return CARD_VIEW;
                 }
-
             }
         });
         mRecyclerView.setLayoutManager(manager);
@@ -91,14 +86,26 @@ public class MainFragment extends Fragment implements Pass_Response_To_Fragment_
         super.onAttach(context);
         mContext = context;
         mActivity = getActivity();
-        ((MainActivity)context).to_fragment_interface = this;
+        ((MainActivity)context).volleyCallback = this;
+        GetListOfDeals();
     }
 
     @Override
-    public void pass_response_to_main_fragment(NetworkResponse networkResponse) {
-        listItems = networkResponse.getTransactionListItemsList();
-        banner = networkResponse.getBanner();
+    public void onSuccess(NetworkResponse result) throws JSONException {
+        listItems = result.getTransactionListItemsList();
+        banner = result.getBanner();
         initRecyclerView();
+    }
 
+    @Override
+    public void onError(String result) throws Exception {
+        Toast.makeText(mContext,result, Toast.LENGTH_LONG).show();
+
+    }
+
+    private void GetListOfDeals(){
+        ServerRequestParameters serverRequestParameters = new ServerRequestParameters(null,null, Request.Method.GET,
+                new UrlBuilder(Constants.URL_GET_ARRAY_OF_DEALS,Constants.URL_GET_ARRAY_OF_DEALS,null,null),Constants.MAIN_FRAGMENT,true);
+        VolleyRequest volleyRequest = new VolleyRequest(mContext,serverRequestParameters,this);
     }
 }

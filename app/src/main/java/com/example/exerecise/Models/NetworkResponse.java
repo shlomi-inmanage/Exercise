@@ -1,6 +1,7 @@
 package com.example.exerecise.Models;
 
 import com.example.exerecise.Util.ResponseDismantle;
+import com.example.exerecise.Util.VolleyCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,12 +12,16 @@ import java.util.ArrayList;
 public class NetworkResponse {
 
     private JSONObject response;
+    private VolleyCallback volleyCallback;
     private TransactionItem transactionItem;
     private ArrayList<TransactionListItem> transactionListItemsList;
     private String banner;
+    private String url;
 
-    public NetworkResponse(JSONObject response) {
+    public NetworkResponse(JSONObject response, String url, VolleyCallback volleyCallback) throws JSONException {
         this.response = response;
+        this.url = url;
+        this.volleyCallback = volleyCallback;
         setResponse();
     }
 
@@ -24,29 +29,19 @@ public class NetworkResponse {
         return response;
     }
 
-    public void setResponse() {
-        try {
-            JSONObject data = response.getJSONObject("data");
-            ResponseDismantle responseDismantle = new ResponseDismantle();
-            try {
-                JSONObject object = data.getJSONObject("itemArr");
-                this.transactionItem = responseDismantle.getItem(object);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            try {
-                JSONArray object = data.getJSONArray("itemsArr");
-                transactionListItemsList = new ArrayList<>();
-                for (int i = 0; i < object.length(); i++) {
-                  this.transactionListItemsList.add(responseDismantle.getListItem(object.getJSONObject(i)));
-                }
-                this.banner = responseDismantle.getBanner(data);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public void setResponse() throws JSONException {
+        ResponseDismantle responseDismantle = new ResponseDismantle();
+        switch (url){
+            case Constants.URL_GET_ARRAY_OF_DEALS:
+                this.transactionListItemsList = responseDismantle.getListItem(response);
+                this.banner = responseDismantle.getBanner(response);
+                break;
+            case Constants.URL_GET_SINGLE_DEAL:
+                this.transactionItem = responseDismantle.getItem(response);
+                break;
         }
+        volleyCallback.onSuccess(this);
+
     }
 
     public void setResponse(JSONObject response) {

@@ -1,7 +1,6 @@
 package com.example.exerecise;
 
 import android.content.pm.PackageManager;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -13,28 +12,20 @@ import android.widget.Toast;
 
 import com.example.exerecise.Fragments.DealDetailsFragment;
 import com.example.exerecise.Fragments.MainFragment;
-import com.example.exerecise.Models.Constants;
-import com.example.exerecise.Models.NetworkResponse;
-import com.example.exerecise.Models.TransactionItem;
 import com.example.exerecise.Util.ChangeFragment;
-import com.example.exerecise.Util.Pass_Response_To_Fragment_Interface;
-import com.example.exerecise.Util.VolleyRequest;
-import com.example.exerecise.Util.getResponse;
+import com.example.exerecise.Util.LoaderManager;
+import com.example.exerecise.Util.VolleyCallback;
 
-import org.json.JSONObject;
 
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity implements getResponse, ChangeFragment {
+public class MainActivity extends AppCompatActivity implements ChangeFragment,  LoaderManager {
 
     private ProgressBar loader;
     private View fragmentSpace;
     private final static int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1234;
     private MainFragment mainFragment;
     private DealDetailsFragment dealDetailsFragment;
-    private VolleyRequest volleyRequest;
     private Toolbar toolbar;
-    public Pass_Response_To_Fragment_Interface to_fragment_interface;
+    public VolleyCallback volleyCallback;
 
 
     @Override
@@ -42,36 +33,15 @@ public class MainActivity extends AppCompatActivity implements getResponse, Chan
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         initViews();
-        String url = "https://androidtest.inmanage.com/api/1.0/android/getDeals.txt";
-        volleyRequest = new VolleyRequest(this,url, Constants.MAIN_FRAGMENT);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        initMainFragment(fragmentTransaction);
         showDialog();
+        initMainFragment();
     }
 
-    @Override
-    public void getJSONObject(JSONObject response, int whatFragmentToShowResponseFromServer) {
-        NetworkResponse networkResponse = new NetworkResponse(response);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        switch (whatFragmentToShowResponseFromServer){
-            case Constants.MAIN_FRAGMENT:
-//                initMainFragment(fragmentTransaction, networkResponse);
-                to_fragment_interface.pass_response_to_main_fragment(networkResponse);
-                break;
-
-            case Constants.DEAL_DETAILS_FRAGMENT:
-                initDealFragment(fragmentTransaction, networkResponse);
-                break;
-        }
-        hideDialog();
-
-    }
 
     @Override
     public void changeFragment(String id) {
-        String url = "https://androidtest.inmanage.com/api/1.0/android/getDeal_"+id+".txt";
-        volleyRequest = new VolleyRequest(this,url, Constants.DEAL_DETAILS_FRAGMENT);
         showDialog();
+        initDealFragment(id);
     }
 
     public void showDialog(){
@@ -97,9 +67,6 @@ public class MainActivity extends AppCompatActivity implements getResponse, Chan
 
     @Override
     public boolean onSupportNavigateUp() {
-        String url = "https://androidtest.inmanage.com/api/1.0/android/getDeals.txt";
-        volleyRequest = new VolleyRequest(this,url, Constants.MAIN_FRAGMENT);
-        showDialog();
         return true;
     }
 
@@ -124,26 +91,37 @@ public class MainActivity extends AppCompatActivity implements getResponse, Chan
         setSupportActionBar(toolbar);
     }
 
-    private void initMainFragment(FragmentTransaction fragmentTransaction, NetworkResponse networkResponse){
+    private void initMainFragment(){
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        mainFragment = MainFragment.newInstance(networkResponse.getTransactionListItemsList(), networkResponse.getBanner());
+        if(mainFragment==null){
+            mainFragment = new MainFragment();
+        }
         fragmentTransaction.replace(R.id.fragment_view, mainFragment, "mainFragment").addToBackStack("MainFragment");
         fragmentTransaction.commit();
     }
 
-    private void initMainFragment(FragmentTransaction fragmentTransaction){
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        mainFragment = new MainFragment();
-        fragmentTransaction.replace(R.id.fragment_view, mainFragment, "mainFragment").addToBackStack("MainFragment");
-        fragmentTransaction.commit();
-    }
-
-    private void initDealFragment(FragmentTransaction fragmentTransaction, NetworkResponse networkResponse){
+    private void initDealFragment(String id){
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ArrayList<TransactionItem> items = new ArrayList<>();
-        items.add(networkResponse.getTransactionItem());
-        dealDetailsFragment = DealDetailsFragment.newInstance(items);
+        if(dealDetailsFragment==null){
+            dealDetailsFragment = new DealDetailsFragment();
+        }
+        Bundle bundle = new Bundle();
+        bundle.putString("id",id);
+        dealDetailsFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_view, dealDetailsFragment,"dealDetailsFragment").addToBackStack("DealDetailsFragment");
         fragmentTransaction.commit();
+    }
+
+
+    @Override
+    public void showLoader() {
+        showDialog();
+    }
+
+    @Override
+    public void hideLoader() {
+        hideDialog();
     }
 }

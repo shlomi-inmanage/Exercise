@@ -1,7 +1,7 @@
-package com.example.exerecise.Util;
+package com.example.exerecise.Util.Interfaces;
 
 
-import com.example.exerecise.Models.NetworkResponse;
+import com.example.exerecise.Util.Server_Response.NetworkResponse;
 
 import org.json.JSONException;
 

@@ -1,9 +1,8 @@
-package com.example.exerecise.Models.Server_Request;
+package com.example.exerecise.Util.Server_Request;
 
 import android.content.Context;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
 public class VolleyController    {

@@ -1,4 +1,4 @@
-package com.example.exerecise.Util;
+package com.example.exerecise.Util.Interfaces;
 
 import org.json.JSONObject;
 

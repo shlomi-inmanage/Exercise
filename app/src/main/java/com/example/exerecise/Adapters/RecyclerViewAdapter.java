@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.exerecise.Models.TransactionListItem;
 import com.example.exerecise.R;
-import com.example.exerecise.Util.ChangeFragment;
+import com.example.exerecise.Util.Interfaces.ChangeFragment;
 import com.example.exerecise.Util.GeneralFuncs;
 
 import java.util.ArrayList;

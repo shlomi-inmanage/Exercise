@@ -3,7 +3,6 @@ package com.example.exerecise.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,20 +15,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.bumptech.glide.Glide;
 import com.example.exerecise.MainActivity;
 import com.example.exerecise.Models.Constants;
-import com.example.exerecise.Models.NetworkResponse;
-import com.example.exerecise.Models.Server_Request.ServerRequestParameters;
-import com.example.exerecise.Models.Server_Request.UrlBuilder;
+import com.example.exerecise.Models.TransactionListItem;
+import com.example.exerecise.Util.Server_Response.NetworkResponse;
+import com.example.exerecise.Models.Server_Request_Parameters.ServerRequestParameters;
+import com.example.exerecise.Models.Server_Request_Parameters.StringUrl;
 import com.example.exerecise.Models.TransactionItem;
 import com.example.exerecise.R;
 import com.example.exerecise.Util.GeneralFuncs;
 import com.example.exerecise.Util.GetPermissions;
-import com.example.exerecise.Util.VolleyCallback;
-import com.example.exerecise.Util.VolleyRequest;
+import com.example.exerecise.Util.Interfaces.VolleyCallback;
+import com.example.exerecise.Util.Server_Request.VolleyRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -44,7 +45,7 @@ import java.util.ArrayList;
 
 public class DealDetailsFragment extends Fragment implements OnMapReadyCallback, VolleyCallback {
 
-    private static final String LIST_KEY = "list_key";
+    private static final java.lang.String LIST_KEY = "list_key";
     private final static int SHOW_PHONE_BUTTON = 1;
     private final static int SHOW_NAV_BUTTON = 2;
     private final static int SHOW_WEBSITE_BUTTON = 4;
@@ -59,6 +60,14 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
     private Button btn_phone, btn_nav, btn_website;
 
 
+    public static DealDetailsFragment newInstance(ArrayList<TransactionItem> item){
+        DealDetailsFragment detailsFragment = new DealDetailsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(LIST_KEY,  item);
+        detailsFragment.setArguments(bundle);
+        return detailsFragment;
+    }
+
     public DealDetailsFragment() {
     }
 
@@ -67,9 +76,11 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.deal_details_fragment, container,false);
         initViews(view, savedInstanceState);
-        Bundle bundle = this.getArguments();
-        if(bundle!=null){
-            getDealDetails(bundle.getString("id"));
+        ArrayList<TransactionItem> listItems = (ArrayList<TransactionItem>) getArguments().getSerializable(LIST_KEY);
+        item = listItems.get(0);
+        if(item!=null){
+            showButtons(item.getOptionsToShow());
+            setInfo();
         }
         return view;
     }
@@ -186,14 +197,14 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
-    public void onError(String result) throws Exception {
-
+    public void onError(java.lang.String result) throws Exception {
+        Toast.makeText(mContext,result,Toast.LENGTH_LONG).show();
     }
 
-    private void getDealDetails(String id){
-        String url ="https://androidtest.inmanage.com/api/1.0/android/getDeal_"+id+".txt";
-        ServerRequestParameters serverRequestParameters = new ServerRequestParameters(null,null, Request.Method.GET,
-                new UrlBuilder(Constants.URL_GET_SINGLE_DEAL,url,null,null),Constants.MAIN_FRAGMENT,true);
+    private void getDealDetails(java.lang.String id){
+        java.lang.String url ="https://androidtest.inmanage.com/api/1.0/android/getDeal_"+id+".txt";
+        ServerRequestParameters serverRequestParameters = new ServerRequestParameters(null, null, Request.Method.GET,
+                new StringUrl(Constants.URL_GET_SINGLE_DEAL, url, null, null), Constants.MAIN_FRAGMENT, true) ;
         VolleyRequest volleyRequest = new VolleyRequest(mContext,serverRequestParameters,this);
     }
 }

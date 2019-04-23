@@ -1,4 +1,4 @@
-package com.example.exerecise.Util;
+package com.example.exerecise.Util.Server_Response;
 
 import com.example.exerecise.Models.TransactionItem;
 import com.example.exerecise.Models.TransactionListItem;

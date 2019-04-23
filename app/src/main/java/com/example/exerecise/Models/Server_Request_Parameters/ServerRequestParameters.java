@@ -1,15 +1,15 @@
-package com.example.exerecise.Models.Server_Request;
+package com.example.exerecise.Models.Server_Request_Parameters;
 
-public class ServerRequestParameters {
+public  class ServerRequestParameters {
 
     private Header header;
     private Body body;
     private int method;
-    private UrlBuilder builder;
+    private StringUrl builder;
     private int fragment_to_return_response;
     private boolean show_loader;
 
-    public ServerRequestParameters(Header header, Body body, int method, UrlBuilder builder, int fragment_to_return_response, boolean show_loader) {
+    public ServerRequestParameters(Header header, Body body, int method, StringUrl builder, int fragment_to_return_response, boolean show_loader) {
         this.header = header;
         this.body = body;
         this.method = method;
@@ -17,6 +17,20 @@ public class ServerRequestParameters {
         this.fragment_to_return_response = fragment_to_return_response;
         this.show_loader = show_loader;
     }
+
+    public ServerRequestParameters(int method, StringUrl builder, int fragment_to_return_response, boolean show_loader) {
+        this.method = method;
+        this.builder = builder;
+        this.fragment_to_return_response = fragment_to_return_response;
+        this.show_loader = show_loader;
+    }
+
+
+    public ServerRequestParameters(int fragment_to_return_response, boolean show_loader) {
+        this.fragment_to_return_response = fragment_to_return_response;
+        this.show_loader = show_loader;
+    }
+
 
     public Header getHeader() {
         return header;
@@ -42,11 +56,11 @@ public class ServerRequestParameters {
         this.method = method;
     }
 
-    public UrlBuilder getBuilder() {
+    public StringUrl getBuilder() {
         return builder;
     }
 
-    public void setBuilder(UrlBuilder builder) {
+    public void setBuilder(StringUrl builder) {
         this.builder = builder;
     }
 

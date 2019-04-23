@@ -1,19 +1,17 @@
-package com.example.exerecise.Util;
+package com.example.exerecise.Util.Server_Request;
 
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.example.exerecise.MainActivity;
-import com.example.exerecise.Models.NetworkResponse;
-import com.example.exerecise.Models.Server_Request.CustomJSONObjectRequest;
-import com.example.exerecise.Models.Server_Request.ServerRequestParameters;
-import com.example.exerecise.Models.Server_Request.VolleyController;
+import com.example.exerecise.Util.Server_Response.NetworkResponse;
+import com.example.exerecise.Models.Server_Request_Parameters.ServerRequestParameters;
+import com.example.exerecise.Util.Interfaces.LoaderManager;
+import com.example.exerecise.Util.Interfaces.VolleyCallback;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,7 +41,6 @@ public class VolleyRequest {
         RequestQueue queue = VolleyController.getInstance(mContext).getRequestQueue();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (serverRequestParameters.getMethod(), serverRequestParameters.getBuilder().getFinalUrl(), null, new Response.Listener<JSONObject>() {
-
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
@@ -57,10 +54,14 @@ public class VolleyRequest {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "onErrorResponse: "+error.getMessage());
-                        // TODO: Handle error
+                        try {
+                            mVolleyCallback.onError(error.getMessage());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
+
         queue.add(jsonObjectRequest);
     }
 

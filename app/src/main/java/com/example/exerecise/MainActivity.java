@@ -12,12 +12,18 @@ import android.widget.Toast;
 
 import com.example.exerecise.Fragments.DealDetailsFragment;
 import com.example.exerecise.Fragments.MainFragment;
-import com.example.exerecise.Util.ChangeFragment;
-import com.example.exerecise.Util.LoaderManager;
-import com.example.exerecise.Util.VolleyCallback;
+import com.example.exerecise.Models.Server_Request_Parameters.ServerRequestHandler;
+import com.example.exerecise.Models.TransactionItem;
+import com.example.exerecise.Models.TransactionListItem;
+import com.example.exerecise.Util.Interfaces.BaseServerResponseInterface;
+import com.example.exerecise.Util.Interfaces.ChangeFragment;
+import com.example.exerecise.Util.Interfaces.LoaderManager;
+import com.example.exerecise.Util.Interfaces.VolleyCallback;
+
+import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity implements ChangeFragment,  LoaderManager {
+public class MainActivity extends AppCompatActivity implements ChangeFragment,  LoaderManager, BaseServerResponseInterface {
 
     private ProgressBar loader;
     private View fragmentSpace;
@@ -26,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
     private DealDetailsFragment dealDetailsFragment;
     private Toolbar toolbar;
     public VolleyCallback volleyCallback;
+    private ServerRequestHandler serverRequestHandler;
 
 
     @Override
@@ -33,23 +40,26 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         initViews();
-        showDialog();
-        initMainFragment();
+        serverRequestHandler.getDealsRequest();
+//        showDialog();
+//        initMainFragment();
     }
 
 
     @Override
     public void changeFragment(String id) {
-        showDialog();
-        initDealFragment(id);
+
+        serverRequestHandler.getDealRequest(id);
     }
 
     public void showDialog(){
+        //shows loader and hides fragments
         fragmentSpace.setVisibility(View.GONE);
         loader.setVisibility(View.VISIBLE);
     }
 
     public void hideDialog(){
+        //shows fragments and hides loader
         fragmentSpace.setVisibility(View.VISIBLE);
         loader.setVisibility(View.GONE);
     }
@@ -59,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_CALL_PHONE: {
+                //handles call phone request permission
                 callPermissionResponseHandler(grantResults);
                 break;
             }
@@ -89,27 +100,25 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
         fragmentSpace = findViewById(R.id.fragment_view);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        serverRequestHandler = new ServerRequestHandler(this);
     }
 
-    private void initMainFragment(){
+    private void initMainFragment(ArrayList<TransactionListItem> transactionListItemsList, String banner){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        if(mainFragment==null){
-            mainFragment = new MainFragment();
-        }
+        mainFragment = MainFragment.newInstance(transactionListItemsList, banner);
         fragmentTransaction.replace(R.id.fragment_view, mainFragment, "mainFragment").addToBackStack("MainFragment");
         fragmentTransaction.commit();
     }
 
-    private void initDealFragment(String id){
+    private void initDealFragment(TransactionItem item){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ArrayList<TransactionItem> items = new ArrayList<>();
+        items.add(item);
         if(dealDetailsFragment==null){
-            dealDetailsFragment = new DealDetailsFragment();
+            dealDetailsFragment = DealDetailsFragment.newInstance(items);
         }
-        Bundle bundle = new Bundle();
-        bundle.putString("id",id);
-        dealDetailsFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_view, dealDetailsFragment,"dealDetailsFragment").addToBackStack("DealDetailsFragment");
         fragmentTransaction.commit();
     }
@@ -123,5 +132,20 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
     @Override
     public void hideLoader() {
         hideDialog();
+    }
+
+    @Override
+    public void onError(String result) throws Exception {
+
+    }
+
+    @Override
+    public void getServerResponseDeals(ArrayList<TransactionListItem> transactionListItemsList, String banner) {
+        initMainFragment(transactionListItemsList,banner);
+    }
+
+    @Override
+    public void getServerResponseDeal(TransactionItem item) {
+        initDealFragment(item);
     }
 }

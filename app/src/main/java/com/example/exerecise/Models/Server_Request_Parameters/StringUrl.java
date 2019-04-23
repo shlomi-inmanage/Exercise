@@ -1,15 +1,15 @@
-package com.example.exerecise.Models.Server_Request;
+package com.example.exerecise.Models.Server_Request_Parameters;
 
 import java.util.ArrayList;
 
-public class UrlBuilder {
+public class StringUrl {
 
-    private String finalUrl;
-    private String baseUrl;
-    private ArrayList<String> keys;
-    private ArrayList<String> values;
+    private java.lang.String finalUrl;
+    private java.lang.String baseUrl;
+    private ArrayList<java.lang.String> keys;
+    private ArrayList<java.lang.String> values;
 
-    public UrlBuilder(String baseUrl,String finalUrl, ArrayList<String> keys, ArrayList<String> values) {
+    public StringUrl(java.lang.String baseUrl, java.lang.String finalUrl, ArrayList<java.lang.String> keys, ArrayList<java.lang.String> values) {
         this.baseUrl = baseUrl;
         this.keys = keys;
         this.values = values;
@@ -17,7 +17,7 @@ public class UrlBuilder {
         setFinalUrl();
     }
 
-    public String getFinalUrl() {
+    public java.lang.String getFinalUrl() {
         return finalUrl;
     }
 
@@ -37,27 +37,27 @@ public class UrlBuilder {
         this.finalUrl = sb.toString();
     }
 
-    public String getBaseUrl() {
+    public java.lang.String getBaseUrl() {
         return baseUrl;
     }
 
-    public void setBaseUrl(String baseUrl) {
+    public void setBaseUrl(java.lang.String baseUrl) {
         this.baseUrl = baseUrl;
     }
 
-    public ArrayList<String> getKeys() {
+    public ArrayList<java.lang.String> getKeys() {
         return keys;
     }
 
-    public void setKeys(ArrayList<String> keys) {
+    public void setKeys(ArrayList<java.lang.String> keys) {
         this.keys = keys;
     }
 
-    public ArrayList<String> getValues() {
+    public ArrayList<java.lang.String> getValues() {
         return values;
     }
 
-    public void setValues(ArrayList<String> values) {
+    public void setValues(ArrayList<java.lang.String> values) {
         this.values = values;
     }
 }

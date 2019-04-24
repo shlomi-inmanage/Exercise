@@ -20,8 +20,13 @@ public class BaseResponse {
         this.response = response;
     }
 
-    public JSONObject getParsed() throws JSONException {
-        JSONObject data = response.getJSONObject("data");
+    public JSONObject getParsed(){
+        JSONObject data = null;
+        try {
+            data = response.getJSONObject("data");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return data;
     }
 

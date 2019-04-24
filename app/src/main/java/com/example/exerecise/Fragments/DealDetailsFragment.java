@@ -17,20 +17,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.bumptech.glide.Glide;
-import com.example.exerecise.MainActivity;
-import com.example.exerecise.Models.Constants;
-import com.example.exerecise.Models.TransactionListItem;
-import com.example.exerecise.Util.Server_Response.NetworkResponse;
-import com.example.exerecise.Models.Server_Request_Parameters.ServerRequestParameters;
-import com.example.exerecise.Models.Server_Request_Parameters.StringUrl;
 import com.example.exerecise.Models.TransactionItem;
 import com.example.exerecise.R;
 import com.example.exerecise.Util.GeneralFuncs;
 import com.example.exerecise.Util.GetPermissions;
-import com.example.exerecise.Util.Interfaces.VolleyCallback;
-import com.example.exerecise.Util.Server_Request.VolleyRequest;
+import com.example.exerecise.Util.Interfaces.LoaderManager;
+import com.example.exerecise.Util.Interfaces.ServerResponseGetDealDetails;
+import com.example.exerecise.Util.Server_Request.ServerRequestHandler;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -38,18 +32,13 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONException;
 
-import java.util.ArrayList;
+public class DealDetailsFragment extends Fragment implements OnMapReadyCallback {
 
-
-public class DealDetailsFragment extends Fragment implements OnMapReadyCallback, VolleyCallback {
-
-    private static final java.lang.String LIST_KEY = "list_key";
     private final static int SHOW_PHONE_BUTTON = 1;
     private final static int SHOW_NAV_BUTTON = 2;
     private final static int SHOW_WEBSITE_BUTTON = 4;
-    private TransactionItem item;
+    private TransactionItem mItem;
     private Context mContext;
     private Activity mActivity;
     private TextView title, price, description;
@@ -58,15 +47,7 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
     private GoogleMap mMap;
     private GeneralFuncs generalFuncs;
     private Button btn_phone, btn_nav, btn_website;
-
-
-    public static DealDetailsFragment newInstance(ArrayList<TransactionItem> item){
-        DealDetailsFragment detailsFragment = new DealDetailsFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(LIST_KEY,  item);
-        detailsFragment.setArguments(bundle);
-        return detailsFragment;
-    }
+    private LoaderManager loaderManager;
 
     public DealDetailsFragment() {
     }
@@ -76,11 +57,10 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.deal_details_fragment, container,false);
         initViews(view, savedInstanceState);
-        ArrayList<TransactionItem> listItems = (ArrayList<TransactionItem>) getArguments().getSerializable(LIST_KEY);
-        item = listItems.get(0);
-        if(item!=null){
-            showButtons(item.getOptionsToShow());
-            setInfo();
+        Bundle bundle = getArguments();
+        if(bundle!=null){
+            String id = bundle.getString("id");
+            sendDealRequest(id);
         }
         return view;
     }
@@ -88,18 +68,23 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
 
 
     private void setInfo(){
-        title.setText(item.getTitle());
-        price.setText(generalFuncs.priceSet(item.getPrice()) +mContext.getResources().getString(R.string.cost));
-        description.setText(item.getDescription());
-        Glide.with(mContext).load(item.getImage()).into(imageView);
+        title.setText(mItem.getTitle());
+        price.setText(generalFuncs.priceSet(mItem.getPrice()) +mContext.getResources().getString(R.string.cost));
+        description.setText(mItem.getDescription());
+        Glide.with(mContext).load(mItem.getImage()).into(imageView);
         initButtons();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if(item!=null){
-            setMarker(new LatLng(Double.valueOf(item.getLat()),Double.valueOf(item.getLon())));
+        if(mItem!=null){
+            setMarker(new LatLng(Double.valueOf(mItem.getLat()),Double.valueOf(mItem.getLon())));
         }
     }
 
@@ -138,7 +123,7 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
             public void onClick(View v) {
                 CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                 CustomTabsIntent customTabsIntent = builder.build();
-                customTabsIntent.launchUrl(mActivity, Uri.parse(item.getWebsite()));
+                customTabsIntent.launchUrl(mActivity, Uri.parse(mItem.getWebsite()));
             }
         });
 
@@ -146,8 +131,8 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("geo:" + item.getLat() + "," +
-                        item.getLon()));
+                intent.setData(Uri.parse("geo:" + mItem.getLat() + "," +
+                        mItem.getLon()));
                 mContext.startActivity(intent);
             }
         });
@@ -155,7 +140,7 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
 
 
     public void phoneIntent(){
-        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + item.getPhone()));
+        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + mItem.getPhone()));
         startActivity(intent);
     }
 
@@ -186,25 +171,24 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback,
         super.onAttach(context);
         mContext = context;
         mActivity = getActivity();
-        ((MainActivity)context).volleyCallback = this;
+        loaderManager = (LoaderManager)mContext;
     }
 
-    @Override
-    public void onSuccess(NetworkResponse result) throws JSONException {
-        item = result.getTransactionItem();
-        showButtons(item.getOptionsToShow());
-        setInfo();
+    private void sendDealRequest(String id){
+        new ServerRequestHandler(mContext,true).sendDealRequest(new ServerResponseGetDealDetails() {
+            @Override
+            public void getServerResponseDealDetails(TransactionItem item) {
+                mItem = item;
+                showButtons(mItem.getOptionsToShow());
+                setInfo();
+            }
+
+            @Override
+            public void onError(String result) {
+                Toast.makeText(mContext,result,Toast.LENGTH_LONG).show();
+            }
+        },id);
     }
 
-    @Override
-    public void onError(java.lang.String result) throws Exception {
-        Toast.makeText(mContext,result,Toast.LENGTH_LONG).show();
-    }
 
-    private void getDealDetails(java.lang.String id){
-        java.lang.String url ="https://androidtest.inmanage.com/api/1.0/android/getDeal_"+id+".txt";
-        ServerRequestParameters serverRequestParameters = new ServerRequestParameters(null, null, Request.Method.GET,
-                new StringUrl(Constants.URL_GET_SINGLE_DEAL, url, null, null), Constants.MAIN_FRAGMENT, true) ;
-        VolleyRequest volleyRequest = new VolleyRequest(mContext,serverRequestParameters,this);
-    }
 }

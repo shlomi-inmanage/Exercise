@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,44 +13,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
 import com.example.exerecise.Adapters.RecyclerViewAdapter;
-import com.example.exerecise.MainActivity;
-import com.example.exerecise.Models.Constants;
-import com.example.exerecise.Util.Server_Response.NetworkResponse;
-import com.example.exerecise.Models.Server_Request_Parameters.ServerRequestParameters;
-import com.example.exerecise.Models.Server_Request_Parameters.StringUrl;
 import com.example.exerecise.Models.TransactionListItem;
 import com.example.exerecise.R;
-import com.example.exerecise.Util.Interfaces.VolleyCallback;
-import com.example.exerecise.Util.Server_Request.VolleyRequest;
-
-import org.json.JSONException;
+import com.example.exerecise.Util.Interfaces.LoaderManager;
+import com.example.exerecise.Util.Interfaces.ServerResponseGetDeals;
+import com.example.exerecise.Util.Server_Request.ServerRequestHandler;
 
 import java.util.ArrayList;
 
-public class MainFragment extends Fragment implements VolleyCallback {
+public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
 
     private Context mContext;
-    private static final String LIST_KEY = "list_key";
-    private static final String BANNER_KEY = "banner_key";
+    private SwipeRefreshLayout swipeRefreshLayout;
     private final static int BANNER_VIEW = 2;
     private final static int BANNER_LOCATION = 2;
     private final static int CARD_VIEW = 1;
-    private java.lang.String banner;
+    private String mBanner;
     private ArrayList<TransactionListItem> listItems;
     private RecyclerView mRecyclerView;
     private RecyclerViewAdapter mRecyclerViewAdapter;
+    private LoaderManager loaderManager;
 
-
-    public static MainFragment newInstance(ArrayList<TransactionListItem> list, String banner){
-        MainFragment mainFragment = new MainFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(BANNER_KEY, banner);
-        bundle.putSerializable(LIST_KEY, list);
-        mainFragment.setArguments(bundle);
-        return mainFragment;
-    }
 
     public MainFragment() {
     }
@@ -58,13 +43,19 @@ public class MainFragment extends Fragment implements VolleyCallback {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view  = inflater.inflate(R.layout.main_fragment, container,false);
-        listItems = (ArrayList<TransactionListItem>) getArguments().getSerializable(LIST_KEY);
-        banner = (String) getArguments().getSerializable(BANNER_KEY);
         initViews(view);
+        sendDealsRequest();
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
     private void initViews(View view){
+        swipeRefreshLayout = view.findViewById(R.id.mf_swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
         mRecyclerView =view.findViewById(R.id.mf_recyclerView);
     }
 
@@ -83,7 +74,7 @@ public class MainFragment extends Fragment implements VolleyCallback {
             }
         });
         mRecyclerView.setLayoutManager(manager);
-        mRecyclerViewAdapter = new RecyclerViewAdapter(listItems,mContext,banner);
+        mRecyclerViewAdapter = new RecyclerViewAdapter(listItems,mContext,mBanner);
         mRecyclerView.setAdapter(mRecyclerViewAdapter);
     }
 
@@ -91,26 +82,36 @@ public class MainFragment extends Fragment implements VolleyCallback {
     public void onAttach(Context context) {
         super.onAttach(context);
         mContext = context;
-        ((MainActivity)context).volleyCallback = this;
-        GetListOfDeals();
+        loaderManager = (LoaderManager)mContext;
     }
 
     @Override
-    public void onSuccess(NetworkResponse result) throws JSONException {
-        listItems = result.getTransactionListItemsList();
-        banner = result.getBanner();
-        initRecyclerView();
-    }
-
-    @Override
-    public void onError(java.lang.String result) throws Exception {
-        Toast.makeText(mContext,result,Toast.LENGTH_LONG).show();
+    public void onRefresh() {
+        sendDealsRequest();
 
     }
 
-    private void GetListOfDeals(){
-        ServerRequestParameters serverRequestParameters = new ServerRequestParameters(null,null, Request.Method.GET,
-                new StringUrl(Constants.URL_GET_ARRAY_OF_DEALS,Constants.URL_GET_ARRAY_OF_DEALS,null,null),Constants.MAIN_FRAGMENT,true);
-        VolleyRequest volleyRequest = new VolleyRequest(mContext,serverRequestParameters,this);
+    private void sendDealsRequest(){
+        new ServerRequestHandler(getContext(),true).sendDealsRequest(new ServerResponseGetDeals() {
+            @Override
+            public void getServerResponseDeals(ArrayList<TransactionListItem> transactionListItemsList, String banner) {
+                listItems = transactionListItemsList;
+                mBanner= banner;
+                initRecyclerView();
+                loaderManager.hideLoader();
+                stopSwipeRefreshLayoutSpin();
+            }
+
+            @Override
+            public void onError(String result) {
+                Toast.makeText(mContext,result,Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void stopSwipeRefreshLayoutSpin(){
+        if(swipeRefreshLayout.isRefreshing()){
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 }

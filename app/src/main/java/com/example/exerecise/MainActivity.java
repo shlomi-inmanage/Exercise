@@ -12,18 +12,12 @@ import android.widget.Toast;
 
 import com.example.exerecise.Fragments.DealDetailsFragment;
 import com.example.exerecise.Fragments.MainFragment;
-import com.example.exerecise.Models.Server_Request_Parameters.ServerRequestHandler;
-import com.example.exerecise.Models.TransactionItem;
-import com.example.exerecise.Models.TransactionListItem;
-import com.example.exerecise.Util.Interfaces.BaseServerResponseInterface;
 import com.example.exerecise.Util.Interfaces.ChangeFragment;
 import com.example.exerecise.Util.Interfaces.LoaderManager;
-import com.example.exerecise.Util.Interfaces.VolleyCallback;
-
-import java.util.ArrayList;
 
 
-public class MainActivity extends AppCompatActivity implements ChangeFragment,  LoaderManager, BaseServerResponseInterface {
+
+public class MainActivity extends AppCompatActivity implements ChangeFragment,  LoaderManager{
 
     private ProgressBar loader;
     private View fragmentSpace;
@@ -31,8 +25,6 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
     private MainFragment mainFragment;
     private DealDetailsFragment dealDetailsFragment;
     private Toolbar toolbar;
-    public VolleyCallback volleyCallback;
-    private ServerRequestHandler serverRequestHandler;
 
 
     @Override
@@ -40,16 +32,13 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         initViews();
-        serverRequestHandler.getDealsRequest();
-//        showDialog();
-//        initMainFragment();
+        initMainFragment();
     }
 
 
     @Override
-    public void changeFragment(String id) {
-
-        serverRequestHandler.getDealRequest(id);
+    public void changeFragment(String dealId) {
+        initDealFragment(dealId);
     }
 
     public void showDialog(){
@@ -78,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
 
     @Override
     public boolean onSupportNavigateUp() {
+        initMainFragment();
         return true;
     }
 
@@ -100,25 +90,23 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
         fragmentSpace = findViewById(R.id.fragment_view);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        serverRequestHandler = new ServerRequestHandler(this);
     }
 
-    private void initMainFragment(ArrayList<TransactionListItem> transactionListItemsList, String banner){
+    private void initMainFragment(){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        mainFragment = MainFragment.newInstance(transactionListItemsList, banner);
+        mainFragment = new MainFragment();
         fragmentTransaction.replace(R.id.fragment_view, mainFragment, "mainFragment").addToBackStack("MainFragment");
         fragmentTransaction.commit();
     }
 
-    private void initDealFragment(TransactionItem item){
+    private void initDealFragment(String dealId){
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ArrayList<TransactionItem> items = new ArrayList<>();
-        items.add(item);
-        if(dealDetailsFragment==null){
-            dealDetailsFragment = DealDetailsFragment.newInstance(items);
-        }
+        dealDetailsFragment = new DealDetailsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("id",dealId);
+        dealDetailsFragment.setArguments(bundle);
         fragmentTransaction.replace(R.id.fragment_view, dealDetailsFragment,"dealDetailsFragment").addToBackStack("DealDetailsFragment");
         fragmentTransaction.commit();
     }
@@ -134,18 +122,4 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
         hideDialog();
     }
 
-    @Override
-    public void onError(String result) throws Exception {
-
-    }
-
-    @Override
-    public void getServerResponseDeals(ArrayList<TransactionListItem> transactionListItemsList, String banner) {
-        initMainFragment(transactionListItemsList,banner);
-    }
-
-    @Override
-    public void getServerResponseDeal(TransactionItem item) {
-        initDealFragment(item);
-    }
 }

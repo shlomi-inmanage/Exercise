@@ -1,4 +1,4 @@
-package com.example.exerecise.Models.Server_Request_Parameters;
+package com.example.exerecise.Util.Server_Request.Requests;
 
 import android.support.annotation.Nullable;
 
@@ -7,6 +7,7 @@ import com.android.volley.ParseError;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.exerecise.Util.Server_Response.BaseResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,12 +18,12 @@ import java.util.Map;
 public abstract class BaseRequest extends JsonObjectRequest {
 
     private int method;
-    private java.lang.String url;
+    private String url;
     private JSONObject jsonObject;
     private Response.Listener listener;
     private Response.ErrorListener errorListener;
 
-    public BaseRequest(int method, java.lang.String url, @Nullable JSONObject jsonRequest, Response.Listener<JSONObject> listener, @Nullable Response.ErrorListener errorListener) {
+    public BaseRequest(int method,String url, @Nullable JSONObject jsonRequest, Response.Listener<JSONObject> listener, @Nullable Response.ErrorListener errorListener) {
         super(method, url, jsonRequest, listener, errorListener);
         this.method = method;
         this.url = url;
@@ -90,4 +91,6 @@ public abstract class BaseRequest extends JsonObjectRequest {
     public void setErrorListener(Response.ErrorListener errorListener) {
         this.errorListener = errorListener;
     }
+
+    protected abstract BaseResponse createResponse(JSONObject jsonObject);
 }

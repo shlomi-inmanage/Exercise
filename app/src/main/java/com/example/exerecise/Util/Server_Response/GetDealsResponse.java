@@ -20,11 +20,16 @@ public class GetDealsResponse extends BaseResponse {
     private int order_num;
 
 
-    public GetDealsResponse(JSONObject response) throws JSONException {
+    public GetDealsResponse(JSONObject response) {
         super(response);
-        this.response = getParsed();
-        setTransactionListItemsList();
-        setBanner();
+        try {
+            this.response = getParsed();
+            setTransactionListItemsList();
+            setBanner();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public ArrayList<TransactionListItem> getTransactionListItemsList() {

@@ -16,9 +16,8 @@ import android.widget.Toast;
 import com.example.exerecise.Adapters.RecyclerViewAdapter;
 import com.example.exerecise.Models.TransactionListItem;
 import com.example.exerecise.R;
-import com.example.exerecise.Util.Interfaces.LoaderManager;
 import com.example.exerecise.Util.Interfaces.ServerResponseGetDeals;
-import com.example.exerecise.Util.Server_Request.ServerRequestHandler;
+import com.example.exerecise.Util.Server_Request.ServerRequestManager;
 
 import java.util.ArrayList;
 
@@ -33,7 +32,6 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     private ArrayList<TransactionListItem> listItems;
     private RecyclerView mRecyclerView;
     private RecyclerViewAdapter mRecyclerViewAdapter;
-    private LoaderManager loaderManager;
 
 
     public MainFragment() {
@@ -82,23 +80,21 @@ public class MainFragment extends Fragment implements SwipeRefreshLayout.OnRefre
     public void onAttach(Context context) {
         super.onAttach(context);
         mContext = context;
-        loaderManager = (LoaderManager)mContext;
     }
 
     @Override
     public void onRefresh() {
         sendDealsRequest();
-
     }
 
     private void sendDealsRequest(){
-        new ServerRequestHandler(getContext(),true).sendDealsRequest(new ServerResponseGetDeals() {
+        ServerRequestManager serverRequestHandler = ServerRequestManager.getInstance(mContext);
+        serverRequestHandler.sendDealsRequest(new ServerResponseGetDeals() {
             @Override
             public void getServerResponseDeals(ArrayList<TransactionListItem> transactionListItemsList, String banner) {
                 listItems = transactionListItemsList;
                 mBanner= banner;
                 initRecyclerView();
-                loaderManager.hideLoader();
                 stopSwipeRefreshLayoutSpin();
             }
 

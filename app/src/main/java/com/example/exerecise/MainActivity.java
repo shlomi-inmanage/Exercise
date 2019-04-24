@@ -2,8 +2,8 @@ package com.example.exerecise;
 
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -13,11 +13,11 @@ import android.widget.Toast;
 import com.example.exerecise.Fragments.DealDetailsFragment;
 import com.example.exerecise.Fragments.MainFragment;
 import com.example.exerecise.Util.Interfaces.ChangeFragment;
-import com.example.exerecise.Util.Interfaces.LoaderManager;
+import java.util.Observable;
 
 
 
-public class MainActivity extends AppCompatActivity implements ChangeFragment,  LoaderManager{
+public class MainActivity extends BaseActivity implements ChangeFragment{
 
     private ProgressBar loader;
     private View fragmentSpace;
@@ -26,31 +26,23 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
     private DealDetailsFragment dealDetailsFragment;
     private Toolbar toolbar;
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         initViews();
         initMainFragment();
     }
 
-
     @Override
     public void changeFragment(String dealId) {
         initDealFragment(dealId);
     }
 
-    public void showDialog(){
-        //shows loader and hides fragments
-        fragmentSpace.setVisibility(View.GONE);
-        loader.setVisibility(View.VISIBLE);
-    }
 
-    public void hideDialog(){
-        //shows fragments and hides loader
-        fragmentSpace.setVisibility(View.VISIBLE);
-        loader.setVisibility(View.GONE);
+    @Override
+    protected View getLoader() {
+        return loader;
     }
 
 
@@ -111,15 +103,13 @@ public class MainActivity extends AppCompatActivity implements ChangeFragment,  
         fragmentTransaction.commit();
     }
 
-
     @Override
-    public void showLoader() {
-        showDialog();
+    public void update(Observable observable, Object o) {
+        super.update(observable, o);
     }
 
     @Override
-    public void hideLoader() {
-        hideDialog();
+    protected void onDestroy() {
+        super.onDestroy();
     }
-
 }

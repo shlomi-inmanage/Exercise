@@ -22,9 +22,8 @@ import com.example.exerecise.Models.TransactionItem;
 import com.example.exerecise.R;
 import com.example.exerecise.Util.GeneralFuncs;
 import com.example.exerecise.Util.GetPermissions;
-import com.example.exerecise.Util.Interfaces.LoaderManager;
 import com.example.exerecise.Util.Interfaces.ServerResponseGetDealDetails;
-import com.example.exerecise.Util.Server_Request.ServerRequestHandler;
+import com.example.exerecise.Util.Server_Request.ServerRequestManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -47,7 +46,6 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback 
     private GoogleMap mMap;
     private GeneralFuncs generalFuncs;
     private Button btn_phone, btn_nav, btn_website;
-    private LoaderManager loaderManager;
 
     public DealDetailsFragment() {
     }
@@ -171,11 +169,11 @@ public class DealDetailsFragment extends Fragment implements OnMapReadyCallback 
         super.onAttach(context);
         mContext = context;
         mActivity = getActivity();
-        loaderManager = (LoaderManager)mContext;
     }
 
     private void sendDealRequest(String id){
-        new ServerRequestHandler(mContext,true).sendDealRequest(new ServerResponseGetDealDetails() {
+        ServerRequestManager serverRequestHandler = ServerRequestManager.getInstance(mContext);
+        serverRequestHandler.sendDealRequest(new ServerResponseGetDealDetails() {
             @Override
             public void getServerResponseDealDetails(TransactionItem item) {
                 mItem = item;

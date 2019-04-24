@@ -5,9 +5,10 @@ import android.content.Context;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.example.exerecise.Util.LoaderObservable;
+import com.example.exerecise.Util.Server_Request.Requests.BaseRequest;
 import com.example.exerecise.Util.Server_Request.Requests.GetDealRequest;
 import com.example.exerecise.Util.Server_Request.Requests.GetDealsRequest;
-import com.example.exerecise.Util.Interfaces.LoaderManager;
 import com.example.exerecise.Util.Interfaces.ServerResponseGetDealDetails;
 import com.example.exerecise.Util.Interfaces.ServerResponseGetDeals;
 import com.example.exerecise.Util.Server_Response.GetDealResponse;
@@ -15,34 +16,40 @@ import com.example.exerecise.Util.Server_Response.GetDealsResponse;
 
 import org.json.JSONObject;
 
-public class ServerRequestHandler {
+public class ServerRequestManager {
 
+    private static ServerRequestManager INSTANCE = null;
+    private LoaderObservable loaderObservable;
     private Context mContext;
-    private LoaderManager loaderManager;
-    private boolean mShowLoader;
 
-    public ServerRequestHandler(Context mContext, boolean showLoader) {
-        this.mContext = mContext;
-        this.loaderManager = (LoaderManager)mContext;
-        this.mShowLoader = showLoader;
-        if(mShowLoader){
-            loaderManager.showLoader();
+    public static ServerRequestManager getInstance(Context context){
+        if(INSTANCE==null){
+            INSTANCE = new ServerRequestManager(context);
         }
+        return INSTANCE;
+    }
 
+    private ServerRequestManager(Context mContext) {
+        this.mContext = mContext;
+        loaderObservable = LoaderObservable.getInstance();
     }
 
     public void sendDealsRequest(ServerResponseGetDeals serverResponseGetDeals){
         GetDealsRequest getDealsRequest = createGetDealsRequest(serverResponseGetDeals);
-        RequestQueue queue = VolleyController.getInstance(mContext).getRequestQueue();
-        queue.add(getDealsRequest);
+        sendRequest(getDealsRequest);
     }
 
 
 
     public void sendDealRequest(ServerResponseGetDealDetails serverResponseGetDealDetails, String id){
         GetDealRequest getDealRequest = createGetDealRequest(id, serverResponseGetDealDetails);
+        sendRequest(getDealRequest);
+    }
+
+    private void sendRequest(BaseRequest baseRequeste) {
+        loaderObservable.setShowLoader(true);
         RequestQueue queue = VolleyController.getInstance(mContext).getRequestQueue();
-        queue.add(getDealRequest);
+        queue.add(baseRequeste);
     }
 
     private GetDealRequest createGetDealRequest(String id, final ServerResponseGetDealDetails serverResponseGetDealDetails) {
@@ -52,7 +59,7 @@ public class ServerRequestHandler {
                 GetDealResponse getDealResponse = new GetDealResponse(response);
                 if(serverResponseGetDealDetails!=null){
                     serverResponseGetDealDetails.getServerResponseDealDetails(getDealResponse.getTransactionItem());
-                    loaderManager.hideLoader();
+                    loaderObservable.setShowLoader(false);
                 }
             }
         }, new Response.ErrorListener() {
@@ -76,7 +83,7 @@ public class ServerRequestHandler {
                 GetDealsResponse getDealsResponse = new GetDealsResponse(response);
                 if(serverResponseGetDeals != null){
                     serverResponseGetDeals.getServerResponseDeals(getDealsResponse.getTransactionListItemsList(), getDealsResponse.getBanner());
-                    loaderManager.hideLoader();
+                    loaderObservable.setShowLoader(false);
                 }
             }
         }, new Response.ErrorListener() {
